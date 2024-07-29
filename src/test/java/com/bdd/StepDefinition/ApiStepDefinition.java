@@ -6,9 +6,14 @@ import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
 import io.cucumber.java.es.Y;
+import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 
+@CucumberContextConfiguration
+@ContextConfiguration(classes = ApiStep.class)
 public class ApiStepDefinition {
+
     @Autowired
     ApiStep apiStep;
 

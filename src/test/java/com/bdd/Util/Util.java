@@ -1,0 +1,69 @@
+package com.bdd.Util;
+
+import io.cucumber.datatable.DataTable;
+import io.restassured.http.Header;
+import io.restassured.http.Headers;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class Util {
+    public static String getValueFromDataTable(DataTable dataTable, String key) {
+        List<Map<String, String>> mapList = dataTable.asMaps();
+        return (String) mapList.get(0).get(key);
+    }
+
+    public static Headers configHeaders(DataTable dataTable) {
+        List<Header> headerList = new LinkedList<>();
+        List<Map<String, String>> headerMapList = dataTable.asMaps();
+
+        headerMapList.forEach(map -> {
+            String name = map.get("header");
+            String value = map.get("value");
+            Header header = new Header(name, value);
+            headerList.add(header);
+        });
+
+        Headers headers = new Headers(headerList);
+        return headers;
+    }
+
+    public static String getProperty(String property) throws IOException {
+        String appConfigPath = System.getProperty("user.dir").concat("\\app.properties");
+        Properties properties = new Properties();
+        properties.load(new FileInputStream(appConfigPath));
+        String valueProperty = properties.getProperty(property, "default");
+        return valueProperty;
+    }
+
+    public static String getEnvironment(String property) throws IOException {
+        String env = Util.getProperty("env");
+        Yaml yaml = new Yaml();
+        try (InputStream in = Files.newInputStream(Paths.get(System.getProperty("user.dir").concat("\\src\\test\\resources\\config\\environment.yml")))) {
+            Map<String, Object> data = yaml.load(in);
+
+            Map<String, Object> app = (Map<String, Object>) data.get("app");
+            Map<String, Object> environments = (Map<String, Object>) app.get(env);
+            AtomicReference<String> val = new AtomicReference<>("");
+            environments.forEach((key, value) -> {
+                if (key.equals(property)) {
+                    val.set((String) value);
+                }
+            });
+            return val.get();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+}

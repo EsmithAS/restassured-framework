@@ -6,10 +6,13 @@ import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
 import io.cucumber.java.es.Y;
-public class ApiStepDefinition {
-    ApiStep apiStep = new ApiStep();
 
-    @Dado("que configuro las cabeceras")
+import java.io.IOException;
+
+public class ApiStepDefinition {
+    private ApiStep apiStep = new ApiStep();
+
+    @Dado("que configuro los headers")
     public void queConfiguroLasCabeceras(DataTable dataTable) {
         apiStep.queConfiguroLasCabeceras(dataTable);
     }
@@ -30,13 +33,13 @@ public class ApiStepDefinition {
     }
 
     @Cuando("ejecuto el api")
-    public void ejecutoElApi(DataTable dataTable) {
+    public void ejecutoElApi(DataTable dataTable) throws IOException {
         apiStep.ejecutoElApi(dataTable);
     }
 
     @Entonces("valido que el status code sea {string}")
     public void validoQueElStatusCodeSea(String code) {
-        apiStep.validoQueElStatusCodeSea(code);
+        apiStep.getStatusCodeSea(code);
     }
 
     @Y("verifico la respuesta del servicio")

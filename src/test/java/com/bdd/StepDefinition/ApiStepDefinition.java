@@ -6,11 +6,8 @@ import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
 import io.cucumber.java.es.Y;
-import org.springframework.beans.factory.annotation.Autowired;
-
 public class ApiStepDefinition {
-    @Autowired
-    ApiStep apiStep;
+    ApiStep apiStep = new ApiStep();
 
     @Dado("que configuro las cabeceras")
     public void queConfiguroLasCabeceras(DataTable dataTable) {

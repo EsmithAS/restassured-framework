@@ -1,6 +1,7 @@
 package com.bdd.Step;
 
 import com.bdd.Constant.Project;
+import com.bdd.Util.ExcelToJson;
 import com.bdd.Util.Util;
 import io.cucumber.datatable.DataTable;
 import io.restassured.RestAssured;
@@ -9,9 +10,12 @@ import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -22,6 +26,7 @@ public class ApiStep {
 
     private RequestSpecification specification;
     private Response response;
+    private List<Response> responseList;
     private String body;
 
     public void queConfiguroLasCabeceras(DataTable dataTable) {
@@ -127,5 +132,25 @@ public class ApiStep {
         File schema = new File(Project.USER_DIR + "/src/test/resources/schemas/" + path);
         Logger.getGlobal().log(Level.INFO, "BODY REQUEST: {0}", response.getBody().asString());
         Assert.assertThat(response.getBody().asString(), JsonSchemaValidator.matchesJsonSchema(schema));
+    }
+
+    public void ejecutoElApiYConfiguroElBodyDesdeUnExcel(String path, DataTable dataTable) throws IOException {
+        responseList = new ArrayList<>();
+        String nameSheet = Util.getValueFromDataTable(dataTable, "nameSheet");
+        ExcelToJson excelToJson = new ExcelToJson(path);
+        List<Map<String, Object>> listData = excelToJson.getMapData().get(nameSheet);
+        Logger.getGlobal().log(Level.INFO, "DATA EXCEL: {0}", new JSONArray(listData).toString());
+        for (Map<String, Object> data : listData) {
+            JSONObject objectUser = new JSONObject(data);
+            body = objectUser.toString();
+            ejecutoElApi(dataTable);
+            responseList.add(response);
+        }
+    }
+
+    public void validoQueElStatusCodeDeLasPeticionesSea(String statusCode) {
+        responseList.forEach(res -> {
+            Assert.assertEquals(res.getBody().asString(), Integer.parseInt(statusCode), res.getStatusCode());
+        });
     }
 }

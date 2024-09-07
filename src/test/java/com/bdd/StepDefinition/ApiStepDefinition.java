@@ -51,4 +51,14 @@ public class ApiStepDefinition {
     public void validoElEsquemaDeLaRespuesta(String path) {
         apiStep.validoElEsquemaDeLaRespuesta(path);
     }
+
+    @Cuando("ejecuto el api y configuro el body desde un excel {string}")
+    public void ejecutoElApiYConfiguroElBodyDesdeUnExcel(String path, DataTable dataTable) throws IOException {
+        apiStep.ejecutoElApiYConfiguroElBodyDesdeUnExcel(path, dataTable);
+    }
+
+    @Entonces("valido que el status code de las peticiones sea {string}")
+    public void validoQueElStatusCodeDeLasPeticionesSea(String statusCode) {
+        apiStep.validoQueElStatusCodeDeLasPeticionesSea(statusCode);
+    }
 }

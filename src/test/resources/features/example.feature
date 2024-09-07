@@ -70,3 +70,14 @@ Característica: Automatización de API Reqres
       | api       | endpoint            | method |
       | ux-reqres | /api/users/{idUser} | DELETE |
     Entonces valido que el status code sea "204"
+
+
+  @CREATE_DATA @EXCEL
+  Escenario: Crear usuarios mediante excel
+    Dado que configuro los headers
+      | header       | value            |
+      | Content-type | application/json |
+    Cuando ejecuto el api y configuro el body desde un excel "/data/data-user.xlsx"
+      | api       | endpoint   | method | nameSheet |
+      | ux-reqres | /api/users | POST   | users     |
+    Entonces valido que el status code de las peticiones sea "201"

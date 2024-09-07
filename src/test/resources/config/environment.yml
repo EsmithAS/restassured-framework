@@ -1,6 +1,6 @@
 app:
   default:
-    base: https://reqres.in
+    default: https://reqres.in
   desa:
     ux-reqres: "URL de api de ambiente desarrollo"
   cert:

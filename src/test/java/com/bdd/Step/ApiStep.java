@@ -1,17 +1,22 @@
 package com.bdd.Step;
 
+import com.bdd.Constant.Project;
 import com.bdd.Util.Util;
 import io.cucumber.datatable.DataTable;
 import io.restassured.RestAssured;
 import io.restassured.http.Headers;
+import io.restassured.module.jsv.JsonSchemaValidator;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.junit.Assert;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ApiStep {
 
@@ -46,6 +51,26 @@ public class ApiStep {
     }
 
     public void configuroElBodyRequest(String path, DataTable dataTable) {
+        try {
+            List<Map<String, String>> mapList = dataTable.asMaps();
+            String pathFile = Project.USER_DIR + "/src/test/resources/request/json/" + path;
+            FileReader fileReader = new FileReader(pathFile);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            body = bufferedReader.lines().collect(Collectors.joining());
+            JsonPath jsonPath = new JsonPath(body);
+
+            mapList.forEach(map -> {
+                String nodo = map.get("key");
+                String valor = map.get("value");
+
+                String valueVariablePath = String.valueOf(jsonPath.getString(nodo)).trim();
+                body = body.replace(valueVariablePath, valor);
+            });
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Logger.getGlobal().log(Level.INFO, "BODY REQUEST: {0}", body);
     }
 
     public void ejecutoElApi(DataTable dataTable) throws IOException {
@@ -80,8 +105,27 @@ public class ApiStep {
     }
 
     public void verificoLaRespuestaDelServicio(DataTable dataTable) {
+        String responseString = response.getBody().asString();
+        List<Map<String, String>> mapList = dataTable.asMaps();
+
+        mapList.forEach(map -> {
+            if (Util.isJSONValid(responseString)) {
+                String nodo = map.get("node");
+                String valorEsperado = map.get("value");
+                JsonPath jsonPath = new JsonPath(response.getBody().asString());
+
+                String valorObtenido = String.valueOf(jsonPath.getString(nodo)).trim();
+                Logger.getGlobal().log(Level.INFO, "VALOR RESPONSE: {0}", valorObtenido);
+                Assert.assertEquals(valorEsperado, valorObtenido);
+            } else {
+                Assert.fail("Respuesta de la api no tiene formato correcto");
+            }
+        });
     }
 
     public void validoElEsquemaDeLaRespuesta(String path) {
+        File schema = new File(Project.USER_DIR + "/src/test/resources/schemas/" + path);
+        Logger.getGlobal().log(Level.INFO, "BODY REQUEST: {0}", response.getBody().asString());
+        Assert.assertThat(response.getBody().asString(), JsonSchemaValidator.matchesJsonSchema(schema));
     }
 }

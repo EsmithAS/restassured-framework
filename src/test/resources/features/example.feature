@@ -1,5 +1,6 @@
 #language:es
 Característica: Automatización de API Reqres
+  #https://reqres.in/
 
   @GET @LIST_USER
   Escenario: Obtener lista de usuarios
@@ -14,9 +15,9 @@ Característica: Automatización de API Reqres
       | ux-reqres | /api/users | GET    |
     Entonces valido que el status code sea "200"
     Y verifico la respuesta del servicio
-      | node    | value |
-      | user.id | 0001  |
-    Y valido el esquema de la respuesta "lista-usuarios.json"
+      | node | value |
+      | page | 2     |
+    Y valido el esquema de la respuesta "list-schema.json"
 
   @POST @CREATE_USER
   Escenario: Crear usuario
@@ -25,15 +26,16 @@ Característica: Automatización de API Reqres
       | Content-type | application/json |
     Y configuro el body request "usuario.json"
       | key  | value |
-      | page | 2     |
+      | name | Name  |
+      | job  | QA    |
     Cuando ejecuto el api
       | api       | endpoint   | method |
       | ux-reqres | /api/users | POST   |
-    Entonces valido que el status code sea "200"
+    Entonces valido que el status code sea "201"
     Y verifico la respuesta del servicio
-      | node    | value |
-      | user.id | 0001  |
-    Y valido el esquema de la respuesta "usuario.json"
+      | node | value |
+      | name | Name  |
+    Y valido el esquema de la respuesta "usuario-schema.json"
 
   @PUT @UPDATE_USER
   Escenario: Actualizar usuario mediante id
@@ -44,16 +46,17 @@ Característica: Automatización de API Reqres
       | key    | value |
       | idUser | 2     |
     Y configuro el body request "usuario.json"
-      | key  | value |
-      | page | 2     |
+      | key  | value       |
+      | name | Name Update |
+      | job  | QA          |
     Cuando ejecuto el api
       | api       | endpoint            | method |
       | ux-reqres | /api/users/{idUser} | PUT    |
     Entonces valido que el status code sea "200"
     Y verifico la respuesta del servicio
-      | node    | value |
-      | user.id | 0001  |
-    Y valido el esquema de la respuesta "usuario.json"
+      | node | value       |
+      | name | Name Update |
+    Y valido el esquema de la respuesta "usuario-schema.json"
 
   @DELETE @DELETE_USER
   Escenario: Eliminar usuario por id
@@ -67,7 +70,3 @@ Característica: Automatización de API Reqres
       | api       | endpoint            | method |
       | ux-reqres | /api/users/{idUser} | DELETE |
     Entonces valido que el status code sea "204"
-    Y verifico la respuesta del servicio
-      | node    | value |
-      | user.id | 0001  |
-    Y valido el esquema de la respuesta "lista-usuarios.json"

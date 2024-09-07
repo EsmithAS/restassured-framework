@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
         features = "src/test/resources/features",
         stepNotifications = true,
         glue = "com.bdd.StepDefinition",
-        tags = "@LIST_USER"
+        tags = "@DELETE_USER"
 )
 public class RunnerTest {
     @BeforeClass

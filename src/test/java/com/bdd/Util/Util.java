@@ -1,5 +1,7 @@
 package com.bdd.Util;
 
+import com.bdd.Constant.Project;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
@@ -14,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Util {
     public static String getValueFromDataTable(DataTable dataTable, String key) {
@@ -38,7 +39,7 @@ public class Util {
     }
 
     public static String getProperty(String property) throws IOException {
-        String appConfigPath = System.getProperty("user.dir").concat("\\app.properties");
+        String appConfigPath = Project.USER_DIR.concat("\\app.properties");
         Properties properties = new Properties();
         properties.load(new FileInputStream(appConfigPath));
         String valueProperty = properties.getProperty(property, "default");
@@ -48,22 +49,41 @@ public class Util {
     public static String getEnvironment(String property) throws IOException {
         String env = Util.getProperty("env");
         Yaml yaml = new Yaml();
-        try (InputStream in = Files.newInputStream(Paths.get(System.getProperty("user.dir").concat("\\src\\test\\resources\\config\\environment.yml")))) {
-            Map<String, Object> data = yaml.load(in);
 
+        try (InputStream in = Files.newInputStream(Paths.get(Project.USER_DIR.concat("\\src\\test\\resources\\config\\environment.yml")))) {
+            Map<String, Object> data = yaml.load(in);
             Map<String, Object> app = (Map<String, Object>) data.get("app");
             Map<String, Object> environments = (Map<String, Object>) app.get(env);
-            AtomicReference<String> val = new AtomicReference<>("");
-            environments.forEach((key, value) -> {
-                if (key.equals(property)) {
-                    val.set((String) value);
-                }
-            });
-            return val.get();
+            String val = "";
 
+            if (app.get(env) == null) {
+                environments = (Map<String, Object>) app.get("default");
+                property = "default";
+            }
+
+            for (Map.Entry<String, Object> entry : environments.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (key.equals(property)) {
+                    val = (String) value;
+                    break;
+                }
+            }
+
+            return val;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public static boolean isJSONValid(String jsonString) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.readTree(jsonString);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
